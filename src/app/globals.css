@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@theme {
+  --color-coal-50: #f0f4f8;
+  --color-coal-100: #d9e2ec;
+  --color-coal-200: #bcccdc;
+  --color-coal-300: #9fb3c8;
+  --color-coal-400: #829ab1;
+  --color-coal-500: #627d98;
+  --color-coal-600: #486581;
+  --color-coal-700: #334e68;
+  --color-coal-800: #243b53;
+  --color-coal-900: #102a43;
+  --color-coal-950: #0a1929;
+  --color-accent: #f59e0b;
+  --color-accent-dark: #d97706;
+  --color-success: #10b981;
+  --color-danger: #ef4444;
+  --color-warning: #f59e0b;
+  --color-info: #3b82f6;
+}
+
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #627d98 transparent;
+  }
+}
