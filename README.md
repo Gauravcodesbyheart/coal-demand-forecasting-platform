@@ -99,51 +99,56 @@ TypeScript code.
 ---
 
 ## Project Structure
+
+```text
 coal-demand-forecasting-platform/
 ├── src/
-│ ├── app/
-│ │ ├── api/ # Next.js route handlers (REST endpoints)
-│ │ │ ├── auth/ # login / logout / me
-│ │ │ ├── audit-logs/
-│ │ │ ├── dashboard/
-│ │ │ ├── dispatch/
-│ │ │ ├── forecast/
-│ │ │ │ ├── history/
-│ │ │ │ └── run/
-│ │ │ ├── health/
-│ │ │ ├── inventory/
-│ │ │ ├── mines/
-│ │ │ ├── notifications/
-│ │ │ ├── production/
-│ │ │ ├── seed/
-│ │ │ ├── upload/
-│ │ │ ├── users/
-│ │ │ └── what-if/
-│ │ ├── dashboard/ # Protected UI pages (one per module)
-│ │ │ ├── audit-logs/
-│ │ │ ├── dispatch/
-│ │ │ ├── forecast/
-│ │ │ ├── inventory/
-│ │ │ ├── mines/
-│ │ │ ├── notifications/
-│ │ │ ├── production/
-│ │ │ ├── upload/
-│ │ │ ├── users/
-│ │ │ ├── what-if/
-│ │ │ ├── layout.tsx # Sidebar + RBAC-aware navigation
-│ │ │ └── page.tsx # Overview dashboard
-│ │ ├── globals.css # Tailwind + custom "coal" palette
-│ │ ├── layout.tsx # Root layout (metadata + body)
-│ │ └── page.tsx # Public login / landing page
-│ ├── db/
-│ │ ├── index.ts # Drizzle + pg Pool (global singleton)
-│ │ └── schema.ts # All tables and enums
-│ └── lib/
-│ ├── audit.ts # logAudit() helper
-│ ├── auth.ts # hashing, JWT, RBAC helpers
-│ ├── forecasting.ts # 4 models + ensemble + what-if
-│ ├── reset-db.ts # (placeholder) DB reset utility
-│ └── seed.ts # Demo-data seeder
+│   ├── app/
+│   │   ├── api/                        # Next.js route handlers (REST endpoints)
+│   │   │   ├── auth/                   #   login / logout / me
+│   │   │   │   ├── login/
+│   │   │   │   ├── logout/
+│   │   │   │   └── me/
+│   │   │   ├── audit-logs/
+│   │   │   ├── dashboard/
+│   │   │   ├── dispatch/
+│   │   │   ├── forecast/
+│   │   │   │   ├── history/
+│   │   │   │   └── run/
+│   │   │   ├── health/
+│   │   │   ├── inventory/
+│   │   │   ├── mines/
+│   │   │   ├── notifications/
+│   │   │   ├── production/
+│   │   │   ├── seed/
+│   │   │   ├── upload/
+│   │   │   ├── users/
+│   │   │   └── what-if/
+│   │   ├── dashboard/                  # Protected UI pages (one per module)
+│   │   │   ├── audit-logs/
+│   │   │   ├── dispatch/
+│   │   │   ├── forecast/
+│   │   │   ├── inventory/
+│   │   │   ├── mines/
+│   │   │   ├── notifications/
+│   │   │   ├── production/
+│   │   │   ├── upload/
+│   │   │   ├── users/
+│   │   │   ├── what-if/
+│   │   │   ├── layout.tsx              #   Sidebar + RBAC-aware navigation shell
+│   │   │   └── page.tsx                #   Overview dashboard
+│   │   ├── globals.css                 # Tailwind + custom "coal" palette
+│   │   ├── layout.tsx                  # Root layout (metadata + <body>)
+│   │   └── page.tsx                    # Public login / landing page
+│   ├── db/
+│   │   ├── index.ts                    # Drizzle instance + pg Pool (global singleton)
+│   │   └── schema.ts                   # All table + enum definitions
+│   └── lib/
+│       ├── audit.ts                    # logAudit() helper
+│       ├── auth.ts                     # Password hashing, JWT, RBAC helpers
+│       ├── forecasting.ts              # 4 statistical models + ensemble + what-if
+│       ├── reset-db.ts                 # (placeholder) DB reset utility
+│       └── seed.ts                     # Demo-data seeder
 ├── drizzle.config.ts
 ├── next.config.ts
 ├── postcss.config.mjs
