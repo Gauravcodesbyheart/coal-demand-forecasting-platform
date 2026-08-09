@@ -100,15 +100,12 @@ TypeScript code.
 
 ## Project Structure
 
-```text
+```
 coal-demand-forecasting-platform/
 ├── src/
 │   ├── app/
-│   │   ├── api/                        # Next.js route handlers (REST endpoints)
-│   │   │   ├── auth/                   #   login / logout / me
-│   │   │   │   ├── login/
-│   │   │   │   ├── logout/
-│   │   │   │   └── me/
+│   │   ├── api/                       # Next.js route handlers (REST endpoints)
+│   │   │   ├── auth/                  # login / logout / me
 │   │   │   ├── audit-logs/
 │   │   │   ├── dashboard/
 │   │   │   ├── dispatch/
@@ -124,7 +121,7 @@ coal-demand-forecasting-platform/
 │   │   │   ├── upload/
 │   │   │   ├── users/
 │   │   │   └── what-if/
-│   │   ├── dashboard/                  # Protected UI pages (one per module)
+│   │   ├── dashboard/                 # Protected UI pages (one per module)
 │   │   │   ├── audit-logs/
 │   │   │   ├── dispatch/
 │   │   │   ├── forecast/
@@ -135,20 +132,20 @@ coal-demand-forecasting-platform/
 │   │   │   ├── upload/
 │   │   │   ├── users/
 │   │   │   ├── what-if/
-│   │   │   ├── layout.tsx              #   Sidebar + RBAC-aware navigation shell
-│   │   │   └── page.tsx                #   Overview dashboard
-│   │   ├── globals.css                 # Tailwind + custom "coal" palette
-│   │   ├── layout.tsx                  # Root layout (metadata + <body>)
-│   │   └── page.tsx                    # Public login / landing page
+│   │   │   ├── layout.tsx             # Sidebar + RBAC-aware navigation
+│   │   │   └── page.tsx               # Overview dashboard
+│   │   ├── globals.css                # Tailwind + custom "coal" palette
+│   │   ├── layout.tsx                 # Root layout (metadata + body)
+│   │   └── page.tsx                   # Public login / landing page
 │   ├── db/
-│   │   ├── index.ts                    # Drizzle instance + pg Pool (global singleton)
-│   │   └── schema.ts                   # All table + enum definitions
+│   │   ├── index.ts                   # Drizzle + pg Pool (global singleton)
+│   │   └── schema.ts                  # All tables and enums
 │   └── lib/
-│       ├── audit.ts                    # logAudit() helper
-│       ├── auth.ts                     # Password hashing, JWT, RBAC helpers
-│       ├── forecasting.ts              # 4 statistical models + ensemble + what-if
-│       ├── reset-db.ts                 # (placeholder) DB reset utility
-│       └── seed.ts                     # Demo-data seeder
+│       ├── audit.ts                   # logAudit() helper
+│       ├── auth.ts                    # hashing, JWT, RBAC helpers
+│       ├── forecasting.ts             # 4 models + ensemble + what-if
+│       ├── reset-db.ts                # (placeholder) DB reset utility
+│       └── seed.ts                    # Demo-data seeder
 ├── drizzle.config.ts
 ├── next.config.ts
 ├── postcss.config.mjs
@@ -156,33 +153,35 @@ coal-demand-forecasting-platform/
 ├── tsconfig.json
 ├── package.json
 └── package-lock.json
-
+```
 
 ---
 
 ## Architecture Overview
-      ┌──────────────────────────┐
-      │  Browser (React 19, RSC) │
-      │  Tailwind UI + Recharts  │
-      └────────────┬─────────────┘
-                   │ HTTPS / Cookie (auth_token, httpOnly)
-      ┌────────────▼─────────────┐
-      │     Next.js 16 Server    │
-      │  ─────────────────────── │
-      │ • App Router pages       │
-      │ • Route handlers (REST)  │
-      │ • Auth (JWT + bcrypt)    │
-      │ • Forecasting engine     │
-      │ • Audit logger           │
-      └────────────┬─────────────┘
-                   │ pg driver over TCP, Drizzle ORM
-      ┌────────────▼─────────────┐
-      │       PostgreSQL         │
-      │  users, mines, records,  │
-      │  forecasts, audit_logs…  │
-      └──────────────────────────┘
 
-      
+```
+          ┌──────────────────────────┐
+          │  Browser (React 19, RSC) │
+          │  Tailwind UI + Recharts  │
+          └────────────┬─────────────┘
+                       │ HTTPS / Cookie (auth_token, httpOnly)
+          ┌────────────▼─────────────┐
+          │     Next.js 16 Server    │
+          │  ─────────────────────── │
+          │ • App Router pages       │
+          │ • Route handlers (REST)  │
+          │ • Auth (JWT + bcrypt)    │
+          │ • Forecasting engine     │
+          │ • Audit logger           │
+          └────────────┬─────────────┘
+                       │ pg driver over TCP, Drizzle ORM
+          ┌────────────▼─────────────┐
+          │       PostgreSQL         │
+          │  users, mines, records,  │
+          │  forecasts, audit_logs…  │
+          └──────────────────────────┘
+```
+
 - **Client** — every `/dashboard/*` page is a client component that fetches
   JSON from `/api/*`. The login page is public and auto-seeds the database on
   first load via `POST /api/seed`.
@@ -315,127 +314,175 @@ JWT_SECRET="replace-with-a-long-random-string"
 
 # Optional – Node env (Next.js sets this automatically)
 NODE_ENV="development"
+```
 
-Database Setup
-Create an empty PostgreSQL database and put its URL in DATABASE_URL.
+> The default `JWT_SECRET` (`coalsense-ai-secret-key-change-in-production`) is
+> committed in source for demo convenience. Generate a real secret
+> (e.g. `openssl rand -hex 32`) for any non-demo environment.
 
-Generate + run migrations with Drizzle Kit:
-npx drizzle-kit generate
-npx drizzle-kit migrate
+### Installation
 
-(You can alternatively use npx drizzle-kit push during early development
-to push the schema directly without migrations.)
+```bash
+git clone https://github.com/&lt;your-org&gt;/coal-demand-forecasting-platform.git
+cd coal-demand-forecasting-platform
+npm install
+```
 
-The app will automatically seed demo users and historical data the first
-time anyone loads the login page (via POST /api/seed). You can also call
-it manually:
-curl -X POST http://localhost:3000/api/seed
-Seeding is idempotent — once users exist it returns immediately.
+### Database Setup
 
-Running the App
+1. Create an empty PostgreSQL database and put its URL in `DATABASE_URL`.
+2. Generate + run migrations with Drizzle Kit:
+
+   ```bash
+   npx drizzle-kit generate
+   npx drizzle-kit migrate
+   ```
+
+   (You can alternatively use `npx drizzle-kit push` during early development
+   to push the schema directly without migrations.)
+
+3. The app will **automatically seed** demo users and historical data the first
+   time anyone loads the login page (via `POST /api/seed`). You can also call
+   it manually:
+
+   ```bash
+   curl -X POST http://localhost:3000/api/seed
+   ```
+
+   Seeding is idempotent — once users exist it returns immediately.
+
+### Running the App
+
+```bash
 npm run dev         # start Next.js dev server on http://localhost:3000
 npm run build       # production build
 npm start           # serve the production build
 npm run lint        # ESLint
 npm run typecheck   # tsc --noEmit
+```
 
-Open http://localhost:3000 and log in with one of the
-demo accounts.
+Open [http://localhost:3000](http://localhost:3000) and log in with one of the
+[demo accounts](#demo-accounts).
 
-API Reference
-All endpoints (except /api/auth/login, /api/health and /api/seed) require
-a valid auth_token cookie and return 401/403 on auth/permission errors.
+---
 
-Method	Endpoint	Description
-GET	/api/health	Liveness probe (runs SELECT 1)
-POST	/api/auth/login	Login with email+password → sets httpOnly JWT cookie
-POST	/api/auth/logout	Clears the auth cookie
-GET	/api/auth/me	Returns the currently authenticated user
-GET	/api/dashboard	KPIs, monthly trends, grade/sector/mine breakdowns
-POST	/api/forecast/run	Run all models for horizonMonths → persist results
-GET	/api/forecast/history	Past forecast runs with predictions & recommendations
-GET/POST	/api/mines	List / create mines (admin only for create)
-GET/POST	/api/production	List / create production records
-GET/POST	/api/dispatch	List / create dispatch records
-GET/POST	/api/inventory	List / create inventory records
-POST	/api/upload	Bulk CSV ingestion (type: production/dispatch/demand)
-POST	/api/what-if	Run what-if scenario analysis
-GET/PATCH	/api/notifications	List notifications / mark all as read
-GET/POST	/api/users	List users (admin) / create user (admin)
-GET	/api/audit-logs	Recent audit trail (admin only)
-POST	/api/seed	Seed demo data (idempotent)
+## API Reference
 
+All endpoints (except `/api/auth/login`, `/api/health` and `/api/seed`) require
+a valid `auth_token` cookie and return `401`/`403` on auth/permission errors.
 
-Example: Run a forecast
+| Method | Endpoint                       | Description                                              |
+| ------ | ------------------------------ | -------------------------------------------------------- |
+| GET    | `/api/health`                  | Liveness probe (runs `SELECT 1`)                         |
+| POST   | `/api/auth/login`              | Login with email+password → sets httpOnly JWT cookie     |
+| POST   | `/api/auth/logout`             | Clears the auth cookie                                   |
+| GET    | `/api/auth/me`                 | Returns the currently authenticated user                 |
+| GET    | `/api/dashboard`               | KPIs, monthly trends, grade/sector/mine breakdowns       |
+| POST   | `/api/forecast/run`            | Run all models for `horizonMonths` → persist results     |
+| GET    | `/api/forecast/history`        | Past forecast runs with predictions &amp; recommendations|
+| GET/POST | `/api/mines`                 | List / create mines (admin only for create)              |
+| GET/POST | `/api/production`            | List / create production records                         |
+| GET/POST | `/api/dispatch`              | List / create dispatch records                           |
+| GET/POST | `/api/inventory`             | List / create inventory records                          |
+| POST   | `/api/upload`                  | Bulk CSV ingestion (`type`: production/dispatch/demand)  |
+| POST   | `/api/what-if`                 | Run what-if scenario analysis                            |
+| GET/PATCH | `/api/notifications`        | List notifications / mark all as read                    |
+| GET/POST | `/api/users`                 | List users (admin) / create user (admin)                 |
+| GET    | `/api/audit-logs`              | Recent audit trail (admin only)                          |
+| POST   | `/api/seed`                    | Seed demo data (idempotent)                              |
 
+### Example: Run a forecast
+
+```bash
 curl -X POST http://localhost:3000/api/forecast/run \
   -H "Content-Type: application/json" \
-  -H "Cookie: auth_token=<JWT>" \
+  -H "Cookie: auth_token=&lt;JWT&gt;" \
   -d '{"horizonMonths": 6}'
+```
 
-Response includes modelComparison[], bestModel, ensemble (with 95% CI
-forecasts) and auto-generated recommendations[].
-Data Ingestion (CSV Upload)
-The Data Upload page (/dashboard/upload) accepts CSV files and parses
-them client-side with PapaParse before POSTing the rows to /api/upload.
+Response includes `modelComparison[]`, `bestModel`, `ensemble` (with 95% CI
+forecasts) and auto-generated `recommendations[]`.
+
+---
+
+## Data Ingestion (CSV Upload)
+
+The **Data Upload** page (`/dashboard/upload`) accepts CSV files and parses
+them client-side with PapaParse before POSTing the rows to `/api/upload`.
 Supported datasets and their required columns:
 
-Type	Required columns	Optional
-production	date, mineId, coalGrade, quantity	shift, productionCost
-dispatch	date, mineId, coalGrade, quantity	sector, destination
-demand	date, coalGrade, quantity	sector
+| Type         | Required columns                                | Optional                 |
+| ------------ | ----------------------------------------------- | ------------------------ |
+| `production` | `date`, `mineId`, `coalGrade`, `quantity`       | `shift`, `productionCost`|
+| `dispatch`   | `date`, `mineId`, `coalGrade`, `quantity`       | `sector`, `destination`  |
+| `demand`     | `date`, `coalGrade`, `quantity`                 | `sector`                 |
 
 Validation rules:
 
-coalGrade must be one of G1–G17.
-sector must be Power | Steel | Cement | Railways | Others.
-shift must be A | B | C | General.
-Rows that fail validation are reported back with row number + message; valid
-rows are inserted in chunks of 500 for performance.
+- `coalGrade` must be one of `G1`–`G17`.
+- `sector` must be `Power | Steel | Cement | Railways | Others`.
+- `shift` must be `A | B | C | General`.
+- Rows that fail validation are reported back with row number + message; valid
+  rows are inserted in chunks of 500 for performance.
 
-Audit & Security
-Passwords are hashed with bcrypt (cost factor 12).
-JWTs are signed with JWT_SECRET (HS256, 24-hour expiry) and sent as
-httpOnly, SameSite=Lax, Secure (in production) cookies — never stored
-in localStorage.
-Authorization is enforced on every server route via getCurrentUser()
-and hasPermission().
-Audit log writes happen on: login, forecast run, CSV upload, mine/user
-creation, production/dispatch/inventory record creation. Logs include user
-ID, action, entity, entity ID, old/new JSON snapshots, IP address and
-timestamp, and are viewable by admins at /dashboard/audit-logs.
-No CSRF bypass is attempted for mutating requests — all state changes go
-through POST/PATCH with cookie-based auth, which benefits from
-SameSite=Lax. For stricter deployments add a CSRF token.
+---
 
+## Audit &amp; Security
 
+- **Passwords** are hashed with bcrypt (cost factor 12).
+- **JWTs** are signed with `JWT_SECRET` (HS256, 24-hour expiry) and sent as
+  `httpOnly`, `SameSite=Lax`, `Secure` (in production) cookies — never stored
+  in `localStorage`.
+- **Authorization** is enforced on every server route via `getCurrentUser()`
+  and `hasPermission()`.
+- **Audit log** writes happen on: login, forecast run, CSV upload, mine/user
+  creation, production/dispatch/inventory record creation. Logs include user
+  ID, action, entity, entity ID, old/new JSON snapshots, IP address and
+  timestamp, and are viewable by admins at `/dashboard/audit-logs`.
+- **No CSRF bypass** is attempted for mutating requests — all state changes go
+  through POST/PATCH with cookie-based auth, which benefits from
+  `SameSite=Lax`. For stricter deployments add a CSRF token.
 
-Scripts
-Defined in package.json:
+---
 
-Script	Command	Description
-npm run dev	next dev	Start the development server
-npm run build	next build	Production build
-npm start	next start	Start the production server
-npm run lint	eslint .	Lint the codebase (ESLint 9 flat config)
-npm run typecheck	tsc --noEmit	Run the TypeScript compiler in check mode
+## Scripts
 
-Future Roadmap
+Defined in [`package.json`](package.json):
+
+| Script            | Command            | Description                                  |
+| ----------------- | ------------------ | -------------------------------------------- |
+| `npm run dev`     | `next dev`         | Start the development server                 |
+| `npm run build`   | `next build`       | Production build                             |
+| `npm start`       | `next start`       | Start the production server                  |
+| `npm run lint`    | `eslint .`         | Lint the codebase (ESLint 9 flat config)     |
+| `npm run typecheck` | `tsc --noEmit`  | Run the TypeScript compiler in check mode    |
+
+---
+
+## Future Roadmap
+
 Potential next steps (not implemented yet):
 
-Export forecasts / reports to PDF or Excel.
-Full CRUD (edit/deactivate) for users, mines and records (currently create/list only).
-Scheduled (cron) forecast runs and email notifications.
-Integration with CCL's live SCADA/ERP data sources.
-Additional forecasting models (ARIMA/SARIMA, Prophet, LSTM) in a pluggable
-registry so the best model can be selected per grade/sector.
-Per-mine and per-grade forecasts (current engine aggregates demand globally).
-User-configurable password policies, MFA, and refresh tokens.
-E2E test suite (Playwright) and unit tests for the forecasting math.
-License
-This project was developed as an internship project for Central Coalfields
-Limited (CCL). No explicit license is attached — treat it as proprietary /
-internal-use code unless the repository owners add a LICENSE file.
+- Export forecasts / reports to PDF or Excel.
+- Full CRUD (edit/deactivate) for users, mines and records (currently create/list only).
+- Scheduled (cron) forecast runs and email notifications.
+- Integration with CCL's live SCADA/ERP data sources.
+- Additional forecasting models (ARIMA/SARIMA, Prophet, LSTM) in a pluggable
+  registry so the best model can be selected per grade/sector.
+- Per-mine and per-grade forecasts (current engine aggregates demand globally).
+- User-configurable password policies, MFA, and refresh tokens.
+- E2E test suite (Playwright) and unit tests for the forecasting math.
 
-<div align="center"> <sub>Built with ⚡ at CCL — CoalSense AI © 2024</sub> </div> ```
-You can directly paste this into a file named README.md at the repository root (it's already saved at /home/user/coal-demand-forecasting-platform/README.md in the workspace). Let me know if you'd like any section trimmed, expanded, or restructured
+---
+
+## License
+
+This project was developed as an internship project for **Central Coalfields
+Limited (CCL)**. No explicit license is attached — treat it as proprietary /
+internal-use code unless the repository owners add a `LICENSE` file.
+
+---
+
+<div align="center">
+  <sub>Built with ⚡ at CCL — CoalSense AI © 2024</sub>
+</div>
