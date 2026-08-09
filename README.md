@@ -484,5 +484,5 @@ internal-use code unless the repository owners add a `LICENSE` file.
 ---
 
 <div align="center">
-  <sub>Built with ⚡ at CCL — CoalSense AI © 2024</sub>
+  <sub>Built by Gaurav at CCL — CoalSense AI © 2026</sub>
 </div>
